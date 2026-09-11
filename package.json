@@ -1,0 +1,38 @@
+{
+  "name": "bothost-central",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "vite preview --host 0.0.0.0",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lovable.dev/cloud-auth-js": "latest",
+    "@supabase/supabase-js": "latest",
+    "@tanstack/react-query": "latest",
+    "@tanstack/react-router": "latest",
+    "@tanstack/react-start": "latest",
+    "clsx": "latest",
+    "fflate": "latest",
+    "lucide-react": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "sonner": "latest",
+    "tailwind-merge": "latest",
+    "tw-animate-css": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "latest",
+    "@tailwindcss/vite": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vite": "latest",
+    "vite-tsconfig-paths": "latest"
+  }
+}

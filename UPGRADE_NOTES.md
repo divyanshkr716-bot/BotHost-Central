@@ -31,10 +31,3 @@ The existing Supabase schema must contain the tables used by the current applica
 - Cleanup accepts a private `CRON_SECRET` for scheduler calls.
 
 Exact 45-second deletion is a target timestamp, not a guaranteed wall-clock promise on Vercel Cron. A sub-minute scheduler such as Supabase pg_cron/pg_net can reduce the delay, but Telegram/network/database latency still means exact-to-the-second timing cannot be guaranteed.
-
-## Hybrid storage backup
-- Supabase Storage is used for project archives when available.
-- Every eligible project archive is also mirrored to the bot's verified Telegram storage channel.
-- If Supabase Storage fails and Telegram storage succeeds, Telegram becomes the recorded primary provider for that archive.
-- Telegram backup metadata (chat/message/file IDs and status) is stored in `bot_project_versions`.
-- Hosted Telegram Bot API document uploads are currently limited to 50 MB; larger archives cannot be mirrored through the standard hosted Bot API. citeturn0search0

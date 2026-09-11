@@ -145,42 +145,6 @@ export const sendVideo = (
   extra?: Record<string, unknown>,
 ) => tgCall<{ message_id: number }>(token, "sendVideo", { chat_id, video, ...extra });
 
-
-export async function sendDocumentBytes(
-  token: string,
-  chat_id: number | string,
-  bytes: Uint8Array,
-  fileName: string,
-  caption?: string,
-): Promise<TgResult<{ message_id: number; document?: { file_id: string; file_unique_id?: string; file_size?: number } }>> {
-  try {
-    const form = new FormData();
-    form.set("chat_id", String(chat_id));
-    form.set("document", new Blob([bytes], { type: "application/zip" }), fileName);
-    if (caption) form.set("caption", caption);
-    const res = await fetch(`${API}/bot${token}/sendDocument`, {
-      method: "POST",
-      body: form,
-    });
-    const json = (await res.json()) as {
-      ok: boolean;
-      result?: { message_id: number; document?: { file_id: string; file_unique_id?: string; file_size?: number } };
-      description?: string;
-      error_code?: number;
-    };
-    if (!json.ok || !json.result) {
-      return {
-        ok: false,
-        error: redact(json.description ?? `Telegram upload error (${res.status})`),
-        code: json.error_code ?? res.status,
-      };
-    }
-    return { ok: true, result: json.result };
-  } catch (e) {
-    return { ok: false, error: redact(e instanceof Error ? e.message : "Network error") };
-  }
-}
-
 export const sendDocument = (
   token: string,
   chat_id: number | string,

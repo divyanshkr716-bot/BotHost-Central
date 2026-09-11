@@ -16,7 +16,7 @@ function StorageOverview() {
       <div>
         <h1 className="text-2xl font-semibold">Storage</h1>
         <p className="text-sm text-muted-foreground">
-          Media is Telegram-backed. Project archives use Supabase when available and are mirrored to the verified Telegram storage channel for backup/fallback.
+          Media lives in private Telegram channels; only file_id references are kept in the database.
         </p>
       </div>
 

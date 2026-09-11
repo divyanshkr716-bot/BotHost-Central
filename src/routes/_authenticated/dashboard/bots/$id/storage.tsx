@@ -37,7 +37,7 @@ function Storage() {
       <Card className="p-4">
         <h2 className="text-sm font-medium">Telegram-as-storage</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Media is Telegram-backed, while project archives can use Supabase plus Telegram backup/fallback. Add the
+          Files are uploaded to a private channel and only the resulting file_id is stored here. Add the
           bot to the channel as an administrator, then verify it below.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

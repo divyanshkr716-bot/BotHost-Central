@@ -45,14 +45,3 @@ Therefore this project does not fake that functionality. It can forward/copy med
 ## Important runtime boundary
 
 Uploaded arbitrary Node/Python source is not executed directly inside the webhook request. The current platform uses a trusted runtime/adapter boundary. Unsupported long-running/polling/user-session projects are reported instead of being falsely marked LIVE.
-
-## Hybrid Supabase + Telegram storage
-
-Project archives use hybrid storage. When a bot has a verified Telegram storage channel:
-- Supabase Storage remains the primary archive store when its upload succeeds.
-- The same archive is mirrored to the verified Telegram storage channel when the hosted Bot API can accept it.
-- If Supabase Storage is unavailable/full but the Telegram backup succeeds, the version is recorded with `storage_provider=telegram` and the Telegram message/file references are stored in `bot_project_versions`.
-- Existing bot media is already Telegram-backed; Supabase keeps metadata/indexes rather than the media bytes.
-- Telegram Bot API uploads are currently limited to 50 MB for new document uploads, so larger project archives cannot be mirrored through the hosted Bot API. citeturn0search0
-
-Apply `supabase/migrations/202609110002_hybrid_telegram_storage_backup.sql` before deploying this version.

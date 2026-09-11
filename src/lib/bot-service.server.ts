@@ -12,7 +12,6 @@ import {
   deleteWebhook,
   getWebhookInfo,
   sendMessage,
-  sendDocumentBytes,
 } from "./telegram.server";
 import { verifyStorageChannel } from "./storage-media.server";
 import { safeExtract, analyzeProject, buildAdapterPlan, sha256Hex, ZipError } from "./analyze.server";
@@ -262,74 +261,10 @@ export async function uploadProject(
   const version = (last?.version ?? 0) + 1;
 
   const storagePath = `${userId}/${botId}/v${version}-${Date.now()}.zip`;
-
-  // Hybrid archive storage: Supabase remains the primary store when available,
-  // while every successful archive upload is mirrored to the bot's verified
-  // Telegram storage channel. If Supabase Storage is full/unavailable, the
-  // Telegram copy becomes the primary reference for this version.
-  let supabaseStored = false;
-  let telegramStored = false;
-  let telegramStorageChatId: number | null = null;
-  let telegramStorageMessageId: number | null = null;
-  let telegramStorageFileId: string | null = null;
-  let storageProvider = "supabase";
-  let backupStatus = "pending";
-
   const upload = await supabaseAdmin.storage
     .from("bot-projects")
     .upload(storagePath, bin, { contentType: "application/zip", upsert: false });
-  if (!upload.error) {
-    supabaseStored = true;
-  } else {
-    backupStatus = `supabase_failed:${upload.error.message}`;
-  }
-
-  const { data: storageChannel } = await db
-    .from("storage_channels")
-    .select("chat_id, verified_at")
-    .eq("bot_id", botId)
-    .not("verified_at", "is", null)
-    .maybeSingle();
-
-  if (storageChannel?.chat_id) {
-    telegramStorageChatId = Number(storageChannel.chat_id);
-    // Telegram Bot API currently accepts multipart document uploads up to 50 MB.
-    // Larger archives cannot be mirrored through the hosted Bot API.
-    if (bin.byteLength <= 50 * 1024 * 1024) {
-      const tg = await sendDocumentBytes(
-        input.token.trim(),
-        telegramStorageChatId,
-        bin,
-        fileName || `bot-project-v${version}.zip`,
-        `BotHost backup: ${botId} / version ${version}`,
-      );
-      if (tg.ok) {
-        telegramStored = true;
-        telegramStorageMessageId = tg.result.message_id;
-        telegramStorageFileId = tg.result.document?.file_id ?? null;
-        backupStatus = supabaseStored ? "backed_up" : "telegram_primary";
-      } else {
-        backupStatus = `telegram_backup_failed:${tg.error}`;
-      }
-    } else {
-      backupStatus = "telegram_backup_skipped_over_50mb";
-    }
-  } else {
-    backupStatus = "telegram_backup_unavailable_no_verified_storage_channel";
-  }
-
-  if (!supabaseStored && !telegramStored) {
-    throw new AppError(
-      `Could not store the project archive. Supabase Storage failed and Telegram backup was unavailable: ${backupStatus}`,
-    );
-  }
-
-  if (!supabaseStored && telegramStored) {
-    storageProvider = "telegram";
-  }
-  const effectiveStoragePath = supabaseStored
-    ? storagePath
-    : `telegram://${telegramStorageChatId}/${telegramStorageMessageId}`;
+  if (upload.error) throw new AppError(`Could not store the archive: ${upload.error.message}`);
 
   const { data: versionRow, error } = await db
     .from("bot_project_versions")
@@ -337,12 +272,7 @@ export async function uploadProject(
       project_id: project.id,
       bot_id: botId,
       version,
-      storage_path: effectiveStoragePath,
-      storage_provider: storageProvider,
-      telegram_storage_chat_id: telegramStorageChatId,
-      telegram_storage_message_id: telegramStorageMessageId,
-      telegram_storage_file_id: telegramStorageFileId,
-      backup_status: backupStatus,
+      storage_path: storagePath,
       project_hash: hash,
       file_count: analysis.fileCount,
       total_bytes: analysis.totalBytes,

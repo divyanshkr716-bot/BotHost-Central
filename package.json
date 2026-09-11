@@ -17,6 +17,7 @@
     "clsx": "latest",
     "fflate": "latest",
     "lucide-react": "latest",
+    "nitro": "^3.0.260903-beta",
     "react": "latest",
     "react-dom": "latest",
     "sonner": "latest",
@@ -25,8 +26,8 @@
     "zod": "latest"
   },
   "devDependencies": {
-    "@tanstack/router-plugin": "latest",
     "@tailwindcss/vite": "latest",
+    "@tanstack/router-plugin": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
